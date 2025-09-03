@@ -3,11 +3,12 @@
 #### NUMBER
 `\d` => um dígito de 0 a 9.<br>
 `+` = > um ou mais.<br>
->`(\.\d*)?` => parte adicional, onde:<br>
-    >>`\.` => o ponto literal precisa da contra-barra porque o ponto em regex significa "qualquer caractere".<br>
-    >>`\d*` => zero ou mais dígitos.<br>
-    >>`(...)` => agrupa.<br>
-    >>`(?)` => significa que pode ter ou não.<br>
+`(\.\d*)?` => parte adicional, onde:
+
+&nbsp;&nbsp;&nbsp;&nbsp;`\.` => o ponto literal precisa da contra-barra porque o ponto em regex significa "qualquer caractere".<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`\d*` => zero ou mais dígitos.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`(...)` => agrupa.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`(?)` => significa que pode ter ou não.<br>
 
 #### ID
 `[A-Za-z_]` => o primeiro caractere deve ser do alfabeto, minúsculo ou maiúsculo ou "_".<br>
