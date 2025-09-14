@@ -1,0 +1,20 @@
+[V] Suportar: integer, real, char, string - Hércules
+[] Atribuição co operador ":="
+[] Entrada com o comando "read()" e saída com os comandos "write()" e "writeln()"
+[] Condicional com o comando if-then-else
+[] Repetição while-do
+[] Repetição repeat-until
+[] Repetição for-to-do
+[] Constantes caracteres delimitados por ('') e strings por ("")
+[] Operadores relacionais "=", "<=", ">=", "<", ">", "<>"
+[] Operadores lógicos and, or e not
+[] Operadores aritméticos "+", "-", "*", "/" e "mod"
+[] Operadores especiais ",", ":", ";", "."
+[] Blocos de comandos delimitados por begin e end
+[] Comentário de bloco com os delimitadores "/*" e "*/"
+
+PALAVRAS RESERVADAS:
+ABSOLUTE ARRAY BEGIN CASE CHAR CONST DIV DO DOWTO ELSE END EXTERNAL FILE FOR FORWARD
+FUNC FUNCTION GOTO IF IMPLEMENTATION INTEGER INTERFACE INTERRUPT LABEL MAIN NIL NIT
+OF PACKED PROC PROGRAM REAL RECORD REPEAT SET SHL SHR STRING THEN TO TYPE UNIT UNTIL
+USES VAR WHILE WITH XOR
