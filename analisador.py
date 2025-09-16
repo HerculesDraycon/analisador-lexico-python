@@ -1,15 +1,34 @@
 import re
+arquivo_de_entrada = "entrada.txt"
+arquivo_de_saida = "saida.txt"
+
+palavras_reservadas = {
+    "ABSOLUTE", "ARRAY", "BEGIN", "CASE", "CHAR", "CONST", "DIV", "DO",
+    "DOWNTO", "ELSE", "END", "EXTERNAL", "FILE", "FOR", "FORWARD", "FUNC",
+    "FUNCTION", "GOTO", "IF", "IMPLEMENTATION", "INTEGER", "INTERFACE",
+    "INTERRUPT", "LABEL", "MAIN", "NIL", "NIT", "OF", "PACKED",
+    "PROC", "PROGRAM", "REAL", "RECORD", "REPEAT", "SET", "SHL", "SHR",
+    "STRING", "THEN", "TO", "TYPE", "UNIT", "UNTIL", "USES", "VAR",
+    "WHILE", "WITH", "XOR"
+}
+
 # Definicao dos padroes de tokens
 token_specification = [
-    ("NUMBER",   r'\d+(\.\d*)?'),   # Numeros inteiros ou decimais
-    ("ID",       r'[A-Za-z_]\w*'),  # Identificadores
-    ("OP",       r'[+\-*/]'),       # Operadores
-    ("SKIP",     r'[ \t]+'),        # Espaços e tabulacoes
-    ("MISMATCH", r'.'),             # Qualquer coisa inesperada
+    ("COMMENT",       r'/\*.*?\*/'),       # Comentarios
+    ("NUMBER",        r'\d+(\.\d*)?'),     # Numeros inteiros ou decimais
+    ("OP",            r'\bmod\b|[+\-*/]'), # Operadores
+    ("OP_RELACIONAL", r'<=|>=|<>|<|>|='),  # Operadores relacionais
+    ("ASSIGN",        r':='),              # Atribuicao
+    ("ID",            r'[A-Za-z_]\w*'),    # Identificadores
+    ("DELIMITER",     r'[();,:]'),         # Simbolos especiais
+    ("SKIP",          r'[ \t]+'),          # Espacos e tabulacoes
+    ("MISMATCH",      r'.'),               # Qualquer coisa inesperada
 ]
 
 tok_regex = "|".join(f"(?P<{name}>{pattern})" for name, pattern in token_specification)
-get_token = re.compile(tok_regex).match
+# re.DOTALL faz com que o regex r'.' idendifique qualquer caractere mais o caractere de quebra de linha (\n),
+# isso faz que ele consiga indentificar comentarios de multiplas linhas
+get_token = re.compile(tok_regex, re.DOTALL).match
 
 def lexer(code):
     pos = 0
@@ -19,12 +38,23 @@ def lexer(code):
             raise SyntaxError(f"Caractere inválido em {pos}")
         kind = match.lastgroup
         value = match.group()
-        if kind != "SKIP" and kind != "MISMATCH":
+        # Faz verificacao se o ID eh igual a algum token presente na lista "palvras_reservadas"
+        if(kind == "ID" and value.upper() in palavras_reservadas):# O compilador vai ser case-sensitive?
+            kind = "RESERVED_TOKEN"
+        if kind not in ("SKIP", "MISMATCH", "COMMENT"):
             yield kind, value
         pos = match.end()
 
-print("Digite uma expressão:")
-exp = input()
-
-tokens = list(lexer(exp))
-print(tokens)
+try:
+    with open(arquivo_de_entrada, 'r', encoding='utf-8') as leitor:
+        codigo_completo = leitor.read()
+        tokens = list(lexer(codigo_completo))
+    with open(arquivo_de_saida, 'w', encoding='utf-8') as escritor:
+        for token in tokens:
+            escritor.write(str(token) + "\n")
+            # Se quiser printar no terminal...
+            #print(token)
+except FileNotFoundError:
+    print(f"O arquivo nao foi encontrado.")
+except Exception as e:
+    print(f"Ocorreu um erro: {e}")

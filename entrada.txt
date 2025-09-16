@@ -1,0 +1,9 @@
+var x,y: integer;
+const pi := 3.1416;
+(x > y)
+/*
+Hercules
+muitcho
+lindo
+*/
+x mod y
