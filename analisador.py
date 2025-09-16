@@ -3,10 +3,10 @@ arquivo_de_entrada = "entrada.txt"
 arquivo_de_saida = "saida.txt"
 
 palavras_reservadas = {
-    "ABSOLUTE", "ARRAY", "BEGIN", "CASE", "CHAR", "CONST", "DIV", "DO",
+    "ABSOLUTE", "AND", "ARRAY", "BEGIN", "CASE", "CHAR", "CONST", "DIV", "DO",
     "DOWNTO", "ELSE", "END", "EXTERNAL", "FILE", "FOR", "FORWARD", "FUNC",
     "FUNCTION", "GOTO", "IF", "IMPLEMENTATION", "INTEGER", "INTERFACE",
-    "INTERRUPT", "LABEL", "MAIN", "NIL", "NIT", "OF", "PACKED",
+    "INTERRUPT", "LABEL", "MAIN", "NIL", "NIT", "NOT", "OF", "OR", "PACKED",
     "PROC", "PROGRAM", "REAL", "RECORD", "REPEAT", "SET", "SHL", "SHR",
     "STRING", "THEN", "TO", "TYPE", "UNIT", "UNTIL", "USES", "VAR",
     "WHILE", "WITH", "XOR"
@@ -16,6 +16,7 @@ palavras_reservadas = {
 token_specification = [
     ("COMMENT",       r'/\*.*?\*/'),       # Comentarios
     ("NUMBER",        r'\d+(\.\d*)?'),     # Numeros inteiros ou decimais
+    ("OP_LOGICO",     r'\b(and|or|not)\b'), # Operadores logicos
     ("OP",            r'\bmod\b|[+\-*/]'), # Operadores
     ("OP_RELACIONAL", r'<=|>=|<>|<|>|='),  # Operadores relacionais
     ("ASSIGN",        r':='),              # Atribuicao

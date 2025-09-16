@@ -7,3 +7,6 @@ muitcho
 lindo
 */
 x mod y
+if (x > 0) and (y < 10) then
+    result := true or false;
+not (x = y)

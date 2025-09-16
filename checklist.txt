@@ -7,7 +7,7 @@
 [] Repetição for-to-do
 [] Constantes caracteres delimitados por ('') e strings por ("")
 [V] Operadores relacionais "=", "<=", ">=", "<", ">", "<>" - Augusto
-[] Operadores lógicos and, or e not
+[V] Operadores lógicos and, or e not - Kauan Rubem
 [V] Operadores aritméticos "+", "-", "*", "/" e "mod" - Augusto
 [V] Operadores especiais ",", ":", ";", ".", "(", ")" - Augusto
 [] Blocos de comandos delimitados por begin e end
