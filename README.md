@@ -24,6 +24,9 @@
 `+\-*/` => operadores aritméticos.<br>
 `\bmod\b` => garante com a boundary que a palavra mod é identificada sozinha.<br>
 
+#### OP_LOGICO
+`(and|or|not)` => operadores de comparação lógica.
+
 #### OP_RELACIONAL
 `<=, >=, <>, <, >, =` => operadores de comparação relacional.
 
