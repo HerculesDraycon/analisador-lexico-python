@@ -1,5 +1,10 @@
 ## Representações dos Tokens
 
+#### COMMENT
+`/ /` => casamento de caracter literal.<br>
+`\*` => significa o caracter literal "*" que indica que pode ter 0 ou mais elementos no intervalo.<br>
+`.*?` => `.` casa qualquer caracter, exceto quebra de linha. `*` 0 ou mais. `?` transforma o `*` em lazy ou seja, vai casar o menor trecho possível que ainda permita fechar o padrão, assim, avaliando um por vez, num escopo menor.<br>
+
 #### NUMBER
 `\d` => um dígito de 0 a 9.<br>
 `+` = > um ou mais.<br>
@@ -17,6 +22,16 @@
 #### OP
 `[...]` => significa qualquer caractere dentro dos colchetes.<br>
 `+\-*/` => operadores aritméticos.<br>
+`\bmod\b` => garante com a boundary que a palavra mod é identificada sozinha.<br>
+
+#### OP_RELACIONAL
+`<=, >=, <>, <, >, =` => operadores de comparação relacional.
+
+#### ASSIGN
+`:=` => token de atribuição.
+
+#### DELIMITER
+`[();,:]` => tokens de delimitação do analisador.
 
 #### SKIP
 `[ \t]` => espaço ou tabulação.<br>
