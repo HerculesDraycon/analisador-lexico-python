@@ -1,8 +1,8 @@
 [V] Suportar: integer, real, char, string - Hércules
 [V] Atribuição co operador ":=" - Augusto
 [] Entrada com o comando "read()" e saída com os comandos "write()" e "writeln()"
-[] Condicional com o comando if-then-else
-[] Repetição while-do
+[V] Condicional com o comando if-then-else - Kauan Rubem
+[V] Repetição while-do - Kauan Rubem
 [] Repetição repeat-until
 [] Repetição for-to-do
 [] Constantes caracteres delimitados por ('') e strings por ("")

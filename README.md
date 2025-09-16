@@ -30,6 +30,12 @@
 #### OP_RELACIONAL
 `<=, >=, <>, <, >, =` => operadores de comparação relacional.
 
+#### CONDITIONAL
+`(if|then|else)` => condicionais.
+
+#### LOOP
+`(while|do)` => estruturas de repetição.
+
 #### ASSIGN
 `:=` => token de atribuição.
 

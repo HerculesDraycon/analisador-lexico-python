@@ -16,6 +16,8 @@ palavras_reservadas = {
 token_specification = [
     ("COMMENT",       r'/\*.*?\*/'),       # Comentarios
     ("NUMBER",        r'\d+(\.\d*)?'),     # Numeros inteiros ou decimais
+    ("CONDITIONAL",   r'\b(if|then|else)\b'), # Condicionais
+    ("LOOP",          r'\b(while|do)\b'),  # Estruturas de repetição
     ("OP_LOGICO",     r'\b(and|or|not)\b'), # Operadores logicos
     ("OP",            r'\bmod\b|[+\-*/]'), # Operadores
     ("OP_RELACIONAL", r'<=|>=|<>|<|>|='),  # Operadores relacionais

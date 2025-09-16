@@ -10,3 +10,11 @@ x mod y
 if (x > 0) and (y < 10) then
     result := true or false;
 not (x = y)
+
+if (x > y) then
+    maior := x
+else
+    maior := y;
+
+while (x < 10) do
+    x := x + 1;
