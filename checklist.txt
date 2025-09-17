@@ -3,8 +3,8 @@
 [] Entrada com o comando "read()" e saída com os comandos "write()" e "writeln()"
 [V] Condicional com o comando if-then-else - Kauan Rubem
 [V] Repetição while-do - Kauan Rubem
-[] Repetição repeat-until
-[] Repetição for-to-do
+[V] Repetição repeat-until - Hércules
+[V] Repetição for-to-do - Hércules
 [] Constantes caracteres delimitados por ('') e strings por ("")
 [V] Operadores relacionais "=", "<=", ">=", "<", ">", "<>" - Augusto
 [V] Operadores lógicos and, or e not - Kauan Rubem

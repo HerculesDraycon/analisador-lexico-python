@@ -14,18 +14,21 @@ palavras_reservadas = {
 
 # Definicao dos padroes de tokens
 token_specification = [
-    ("COMMENT",       r'/\*.*?\*/'),       # Comentarios
-    ("NUMBER",        r'\d+(\.\d*)?'),     # Numeros inteiros ou decimais
-    ("CONDITIONAL",   r'\b(if|then|else)\b'), # Condicionais
-    ("LOOP",          r'\b(while|do)\b'),  # Estruturas de repetição
-    ("OP_LOGICO",     r'\b(and|or|not)\b'), # Operadores logicos
-    ("OP",            r'\bmod\b|[+\-*/]'), # Operadores
-    ("OP_RELACIONAL", r'<=|>=|<>|<|>|='),  # Operadores relacionais
-    ("ASSIGN",        r':='),              # Atribuicao
-    ("ID",            r'[A-Za-z_]\w*'),    # Identificadores
-    ("DELIMITER",     r'[();,:]'),         # Simbolos especiais
-    ("SKIP",          r'[ \t]+'),          # Espacos e tabulacoes
-    ("MISMATCH",      r'.'),               # Qualquer coisa inesperada
+    ("COMMENT",       r'/\*.*?\*/'),             # Comentarios
+    ("NUMBER",        r'\d+(\.\d*)?'),           # Numeros inteiros ou decimais
+    ("CONDITIONAL",   r'\b(if|then|else)\b'),    # Condicionais
+    ("LOOP",          r'\b(while|do)\b'),        # Estruturas de repetição
+    ("REPEAT",        r'\brepeat\b'),            # palavra reservada "repeat"
+    ("UNTIL",         r'\buntil\b'),             # palavra reservada "until"
+    ("FOR-TO-DO",     r'\b(for|to|do)\b'),       # Estrutura de for-to-do
+    ("OP_LOGICO",     r'\b(and|or|not)\b'),      # Operadores logicos
+    ("OP",            r'\bmod\b|[+\-*/]'),       # Operadores
+    ("OP_RELACIONAL", r'<=|>=|<>|<|>|='),        # Operadores relacionais
+    ("ASSIGN",        r':='),                    # Atribuicao
+    ("ID",            r'[A-Za-z_]\w*'),          # Identificadores
+    ("DELIMITER",     r'[();,:]'),               # Simbolos especiais
+    ("SKIP",          r'[ \t]+'),                # Espacos e tabulacoes
+    ("MISMATCH",      r'.'),                     # Qualquer coisa inesperada
 ]
 
 tok_regex = "|".join(f"(?P<{name}>{pattern})" for name, pattern in token_specification)

@@ -25,16 +25,18 @@
 `\bmod\b` => garante com a boundary que a palavra mod é identificada sozinha.<br>
 
 #### OP_LOGICO
-`(and|or|not)` => operadores de comparação lógica.
+`\b(and|or|not)\b` => operadores de comparação lógica cercados por boundary.
 
 #### OP_RELACIONAL
 `<=, >=, <>, <, >, =` => operadores de comparação relacional.
 
 #### CONDITIONAL
-`(if|then|else)` => condicionais.
+`\b(if|then|else)\b` => condicionais cercados por boundary.
 
 #### LOOP
-`(while|do)` => estruturas de repetição.
+`\b(while|do)\b` => estruturas de repetição cercadas por boundary.
+`\brepeat\b` e `\buntil\b` => estruturas de repetição cercadas por boundary.
+`\b(for|to|do)\b` => estruturas do for-to-do cercadas por boundary.
 
 #### ASSIGN
 `:=` => token de atribuição.
