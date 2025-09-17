@@ -5,6 +5,18 @@
 `\*` => significa o caracter literal "*" que indica que pode ter 0 ou mais elementos no intervalo.<br>
 `.*?` => `.` casa qualquer caracter, exceto quebra de linha. `*` 0 ou mais. `?` transforma o `*` em lazy ou seja, vai casar o menor trecho possível que ainda permita fechar o padrão, assim, avaliando um por vez, num escopo menor.<br>
 
+#### STRING
+`"[^"]*"` => strings delimitadas por aspas duplas, onde:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`"` => aspas duplas literais no início e fim.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`[^"]` => qualquer caractere exceto aspas duplas.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`*` => zero ou mais caracteres permitidos dentro das aspas.<br>
+
+#### CHAR
+`'[^']*'` => caracteres delimitados por aspas simples, onde:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`'` => aspas simples literais no início e fim.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`[^']` => qualquer caractere exceto aspas simples.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`*` => zero ou mais caracteres permitidos dentro das aspas.<br>
+
 #### NUMBER
 `\d` => um dígito de 0 a 9.<br>
 `+` = > um ou mais.<br>
@@ -32,6 +44,12 @@
 
 #### CONDITIONAL
 `\b(if|then|else)\b` => condicionais cercados por boundary.
+
+#### BLOCK
+`\b(begin|end)\b` => blocos de comandos delimitados por begin e end, onde:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`\b` => boundary que garante que as palavras sejam reconhecidas como tokens completos.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`(begin|end)` => alternância entre as palavras-chave "begin" e "end".<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`\b` => boundary final para evitar casamento parcial com outras palavras.<br>
 
 #### LOOP
 `\b(while|do)\b` => estruturas de repetição cercadas por boundary.

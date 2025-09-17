@@ -15,12 +15,15 @@ palavras_reservadas = {
 # Definicao dos padroes de tokens
 token_specification = [
     ("COMMENT",       r'/\*.*?\*/'),             # Comentarios
+    ("STRING",        r'"[^"]*"'),               # Strings delimitadas por aspas duplas
+    ("CHAR",          r"'[^']*'"),               # Caracteres delimitados por aspas simples
     ("NUMBER",        r'\d+(\.\d*)?'),           # Numeros inteiros ou decimais
+    ("BLOCK",         r'\b(begin|end)\b'),       # Blocos de comandos
     ("CONDITIONAL",   r'\b(if|then|else)\b'),    # Condicionais
     ("LOOP",          r'\b(while|do)\b'),        # Estruturas de repetição
     ("REPEAT",        r'\brepeat\b'),            # palavra reservada "repeat"
     ("UNTIL",         r'\buntil\b'),             # palavra reservada "until"
-    ("FOR-TO-DO",     r'\b(for|to|do)\b'),       # Estrutura de for-to-do
+    ("FOR_TO_DO",     r'\b(for|to|do)\b'),       # Estrutura de for-to-do
     ("OP_LOGICO",     r'\b(and|or|not)\b'),      # Operadores logicos
     ("OP",            r'\bmod\b|[+\-*/]'),       # Operadores
     ("OP_RELACIONAL", r'<=|>=|<>|<|>|='),        # Operadores relacionais

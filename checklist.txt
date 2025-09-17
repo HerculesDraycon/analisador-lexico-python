@@ -5,12 +5,12 @@
 [V] Repetição while-do - Kauan Rubem
 [V] Repetição repeat-until - Hércules
 [V] Repetição for-to-do - Hércules
-[] Constantes caracteres delimitados por ('') e strings por ("")
+[V] Constantes caracteres delimitados por ('') e strings por ("") - Kauan Rubem
 [V] Operadores relacionais "=", "<=", ">=", "<", ">", "<>" - Augusto
 [V] Operadores lógicos and, or e not - Kauan Rubem
 [V] Operadores aritméticos "+", "-", "*", "/" e "mod" - Augusto
 [V] Operadores especiais ",", ":", ";", ".", "(", ")" - Augusto
-[] Blocos de comandos delimitados por begin e end
+[V] Blocos de comandos delimitados por begin e end - Kauan Rubem
 [V] Comentário de bloco com os delimitadores "/*" e "*/" - Augusto
 [V] Ler um arquivo de entrada (.txt) e gerar um de saida (.txt) - Augusto
 [V] Identificar palavras reservadas - Augusto

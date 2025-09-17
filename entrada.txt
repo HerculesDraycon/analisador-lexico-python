@@ -18,3 +18,25 @@ else
 
 while (x < 10) do
     x := x + 1;
+
+nome := "João Silva";
+inicial := 'J';
+mensagem := "Olá, mundo!";
+caractere := 'A';
+string_vazia := "";
+char_especial := '#';
+
+begin
+    x := 10;
+    y := 20;
+    if x < y then
+    begin
+        resultado := x + y;
+        write(resultado);
+    end
+    else
+    begin
+        resultado := x - y;
+        writeln(resultado);
+    end;
+end
