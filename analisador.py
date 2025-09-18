@@ -15,6 +15,9 @@ palavras_reservadas = {
 # Definicao dos padroes de tokens
 token_specification = [
     ("COMMENT",       r'/\*.*?\*/'),             # Comentarios
+    ("READ",          r'\bread\b'),              # Comando de entrada
+    ("WRITE",         r'\bwrite\b'),             # Comando de saída
+    ("WRITELN",       r'\bwriteln\b'),           # Comando de saída com quebra de linha
     ("STRING",        r'"[^"]*"'),               # Strings delimitadas por aspas duplas
     ("CHAR",          r"'[^']*'"),               # Caracteres delimitados por aspas simples
     ("NUMBER",        r'\d+(\.\d*)?'),           # Numeros inteiros ou decimais

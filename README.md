@@ -50,6 +50,9 @@
 &nbsp;&nbsp;&nbsp;&nbsp;`\b` => boundary que garante que as palavras sejam reconhecidas como tokens completos.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;`(begin|end)` => alternância entre as palavras-chave "begin" e "end".<br>
 &nbsp;&nbsp;&nbsp;&nbsp;`\b` => boundary final para evitar casamento parcial com outras palavras.<br>
+`\bread\b` => bloco de leitura read 
+`\bwrite\b` => bloco de saída write
+`\bwriteln\b` => bloco de saída write com quebra de linha
 
 #### LOOP
 `\b(while|do)\b` => estruturas de repetição cercadas por boundary.

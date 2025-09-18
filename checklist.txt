@@ -1,19 +1,21 @@
-[V] Suportar: integer, real, char, string - Hércules
-[V] Atribuição co operador ":=" - Augusto
-[] Entrada com o comando "read()" e saída com os comandos "write()" e "writeln()"
-[V] Condicional com o comando if-then-else - Kauan Rubem
-[V] Repetição while-do - Kauan Rubem
-[V] Repetição repeat-until - Hércules
 [V] Repetição for-to-do - Hércules
-[V] Constantes caracteres delimitados por ('') e strings por ("") - Kauan Rubem
-[V] Operadores relacionais "=", "<=", ">=", "<", ">", "<>" - Augusto
+[V] Repetição repeat-until - Hércules
+[V] Suportar: integer, real, char, string - Hércules
+[V] Entrada com o comando "read()" e saída com os comandos "write()" e "writeln()" - Hércules
+
+[V] Repetição while-do - Kauan Rubem
 [V] Operadores lógicos and, or e not - Kauan Rubem
+[V] Condicional com o comando if-then-else - Kauan Rubem
+[V] Blocos de comandos delimitados por begin e end - Kauan Rubem
+[V] Constantes caracteres delimitados por ('') e strings por ("") - Kauan Rubem
+
+[V] Atribuição co operador ":=" - Augusto
+[V] Identificar palavras reservadas - Augusto
 [V] Operadores aritméticos "+", "-", "*", "/" e "mod" - Augusto
 [V] Operadores especiais ",", ":", ";", ".", "(", ")" - Augusto
-[V] Blocos de comandos delimitados por begin e end - Kauan Rubem
 [V] Comentário de bloco com os delimitadores "/*" e "*/" - Augusto
+[V] Operadores relacionais "=", "<=", ">=", "<", ">", "<>" - Augusto
 [V] Ler um arquivo de entrada (.txt) e gerar um de saida (.txt) - Augusto
-[V] Identificar palavras reservadas - Augusto
 
 PALAVRAS RESERVADAS:
 ABSOLUTE ARRAY BEGIN CASE CHAR CONST DIV DO DOWTO ELSE END EXTERNAL FILE FOR FORWARD
