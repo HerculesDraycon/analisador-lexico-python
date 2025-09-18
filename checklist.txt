@@ -1,6 +1,7 @@
 [V] Repetição for-to-do - Hércules
 [V] Repetição repeat-until - Hércules
 [V] Suportar: integer, real, char, string - Hércules
+[V] Sistema de escolha de arquivo pelo usuário - Hércules
 [V] Entrada com o comando "read()" e saída com os comandos "write()" e "writeln()" - Hércules
 
 [V] Repetição while-do - Kauan Rubem

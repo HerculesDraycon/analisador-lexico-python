@@ -1,6 +1,4 @@
 import re
-arquivo_de_entrada = "entrada.txt"
-arquivo_de_saida = "saida.txt"
 
 palavras_reservadas = {
     "ABSOLUTE", "AND", "ARRAY", "BEGIN", "CASE", "CHAR", "CONST", "DIV", "DO",
@@ -41,6 +39,10 @@ tok_regex = "|".join(f"(?P<{name}>{pattern})" for name, pattern in token_specifi
 # re.DOTALL faz com que o regex r'.' idendifique qualquer caractere mais o caractere de quebra de linha (\n),
 # isso faz que ele consiga indentificar comentarios de multiplas linhas
 get_token = re.compile(tok_regex, re.DOTALL).match
+
+print("Digite o nome do arquivo que deseja ler: ")
+arquivo_de_entrada = input()
+arquivo_de_saida = arquivo_de_entrada[:5] + "_output.txt"
 
 def lexer(code):
     pos = 0
