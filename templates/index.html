@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisador Léxico - Interface Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-code"></i>
+                    <h1>Analisador Léxico</h1>
+                </div>
+                <p class="subtitle">Análise de tokens em código Pascal</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="input-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-code"></i> Código para Análise</h2>
+                    <div class="input-controls">
+                        <button type="button" class="btn btn-secondary" onclick="clearCode()">
+                            <i class="fas fa-trash"></i> Limpar
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="loadExample()">
+                            <i class="fas fa-file-code"></i> Exemplo
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Área de upload de arquivos -->
+                <div class="file-upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <p class="upload-text">Arraste arquivos .txt ou .docx aqui</p>
+                            <p class="upload-subtext">ou clique para selecionar</p>
+                            <input type="file" id="fileInput" accept=".txt,.docx" style="display: none;">
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-file-upload"></i> Selecionar Arquivo
+                            </button>
+                        </div>
+                    </div>
+                    <div class="file-info" id="fileInfo" style="display: none;">
+                        <div class="file-details">
+                            <i class="fas fa-file-alt"></i>
+                            <span class="file-name" id="fileName"></span>
+                            <span class="file-size" id="fileSize"></span>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="removeFile()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-divider">
+                    <span>OU</span>
+                </div>
+                
+                <textarea 
+                    id="codeInput" 
+                    placeholder="Digite ou cole seu código Pascal aqui..."
+                    spellcheck="false"
+                ></textarea>
+            </div>
+
+            <div class="action-section">
+                <button id="analyzeBtn" class="btn btn-primary">
+                    <i class="fas fa-play"></i>
+                    <span>Analisar Código</span>
+                </button>
+            </div>
+
+            <div class="results-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> Tokens Identificados</h2>
+                    <div class="results-info">
+                        <span id="tokenCount">0 tokens</span>
+                        <button id="downloadBtn" class="btn btn-secondary" style="display: none;">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="resultsContainer" class="results-container">
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>Nenhuma análise realizada ainda</p>
+                        <small>Digite um código e clique em "Analisar Código" para ver os tokens</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="legend-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-info-circle"></i> Legenda de Tokens</h3>
+                </div>
+                <div class="legend-grid">
+                    <div class="legend-item">
+                        <span class="token-badge reserved">RESERVED_TOKEN</span>
+                        <span>Palavras reservadas</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="token-badge identifier">ID</span>
+                        <span>Identificadores</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="token-badge number">NUMBER</span>
+                        <span>Números</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="token-badge string">STRING</span>
+                        <span>Strings</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="token-badge operator">OP</span>
+                        <span>Operadores</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="token-badge delimiter">DELIMITER</span>
+                        <span>Delimitadores</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="token-badge conditional">CONDITIONAL</span>
+                        <span>Condicionais</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="token-badge loop">LOOP</span>
+                        <span>Estruturas de repetição</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="loading-spinner">
+                <i class="fas fa-cog fa-spin"></i>
+                <p>Analisando código...</p>
+            </div>
+        </div>
+
+        <div id="errorModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Erro na Análise</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary modal-close">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
