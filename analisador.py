@@ -12,27 +12,28 @@ palavras_reservadas = {
 
 # Definicao dos padroes de tokens
 token_specification = [
-    ("COMMENT",       r'/\*.*?\*/'),             # Comentarios
-    ("READ",          r'\bread\b'),              # Comando de entrada
-    ("WRITE",         r'\bwrite\b'),             # Comando de saída
-    ("WRITELN",       r'\bwriteln\b'),           # Comando de saída com quebra de linha
-    ("STRING",        r'"[^"]*"'),               # Strings delimitadas por aspas duplas
-    ("CHAR",          r"'[^']*'"),               # Caracteres delimitados por aspas simples
-    ("NUMBER",        r'\d+(\.\d*)?'),           # Numeros inteiros ou decimais
-    ("BLOCK",         r'\b(begin|end)\b'),       # Blocos de comandos
-    ("CONDITIONAL",   r'\b(if|then|else)\b'),    # Condicionais
-    ("LOOP",          r'\b(while|do)\b'),        # Estruturas de repetição
-    ("REPEAT",        r'\brepeat\b'),            # palavra reservada "repeat"
-    ("UNTIL",         r'\buntil\b'),             # palavra reservada "until"
-    ("FOR_TO_DO",     r'\b(for|to|do)\b'),       # Estrutura de for-to-do
-    ("OP_LOGICO",     r'\b(and|or|not)\b'),      # Operadores logicos
-    ("OP",            r'\bmod\b|[+\-*/]'),       # Operadores
-    ("OP_RELACIONAL", r'<=|>=|<>|<|>|='),        # Operadores relacionais
-    ("ASSIGN",        r':='),                    # Atribuicao
-    ("ID",            r'[A-Za-z_]\w*'),          # Identificadores
-    ("DELIMITER",     r'[();,:]'),               # Simbolos especiais
-    ("SKIP",          r'[ \t]+'),                # Espacos e tabulacoes
-    ("MISMATCH",      r'.'),                     # Qualquer coisa inesperada
+    ("COMMENT",       r'/\*.*?\*/'),                    # Comentarios
+    ("READ",          r'\bread\b'),                     # Comando de entrada
+    ("WRITE",         r'\bwrite\b'),                    # Comando de saída
+    ("WRITELN",       r'\bwriteln\b'),                  # Comando de saída com quebra de linha
+    ("STRING",        r'"[^"]*"'),                      # Strings delimitadas por aspas duplas
+    ("CHAR",          r"'[^']*'"),                      # Caracteres delimitados por aspas simples
+    ("NUMBER",        r'\d+(\.\d*)?([eE][+-]?\d+)?'),   # Numeros inteiros, decimais e com notacao cientifica
+    ("BLOCK",         r'\b(begin|end)\b'),              # Blocos de comandos
+    ("CONDITIONAL",   r'\b(if|then|else)\b'),           # Condicionais
+    ("LOOP",          r'\b(while|do)\b'),               # Estruturas de repetição
+    ("REPEAT",        r'\brepeat\b'),                   # palavra reservada "repeat"
+    ("UNTIL",         r'\buntil\b'),                    # palavra reservada "until"
+    ("FOR_TO_DO",     r'\b(for|to|do)\b'),              # Estrutura de for-to-do
+    ("OP_LOGICO",     r'\b(and|or|not)\b'),             # Operadores logicos
+    ("OP",            r'\b(mod|div)\b|[+\-*/]'),        # Operadores
+    ("OP_RELACIONAL", r'<=|>=|<>|<|>|='),               # Operadores relacionais
+    ("ASSIGN",        r':='),                           # Atribuicao
+    ("ID",            r'[A-Za-z_]\w*'),                 # Identificadores
+    ("DELIMITER",     r'[();,:]'),                      # Simbolos especiais
+    ("END_PROGRAM",   r'\.'),                           # Final de programa
+    ("SKIP",          r'[ \t]+'),                       # Espacos e tabulacoes
+    ("MISMATCH",      r'.'),                            # Qualquer coisa inesperada
 ]
 
 tok_regex = "|".join(f"(?P<{name}>{pattern})" for name, pattern in token_specification)
