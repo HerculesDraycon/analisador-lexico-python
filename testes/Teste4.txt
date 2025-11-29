@@ -1,0 +1,11 @@
+program TesteDeErros;
+
+var a, b#: integer;
+
+begin
+  /*numeros malformados*/
+  a := 123.;
+  b := 1.2.3;
+  a := 15e;
+  /* Este eh um comentario que nunca fecha.
+  writeln("Codigo"); // Simbolos invalidos soltos: @ $

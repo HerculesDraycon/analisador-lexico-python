@@ -1,0 +1,26 @@
+program TesteEstruturasControle;
+
+var contador, numero: integer;
+parar: char;
+
+begin
+  contador := 10;
+  parar := 'n'; 
+
+  while contador > 0 do
+  begin
+    writeln("Contador atual: ", contador);
+    contador := contador - 1;
+  end;
+
+  repeat
+    writeln("Digite 's' para parar o laco repeat.");
+    read(parar);
+    if not (parar = 's') then
+    writeln("Voce digitou algo diferente de 's'...");
+  until parar = 's';
+
+  numero := 21;
+  if (numero mod 2) <> 0 then
+    writeln("O numero 21 eh impar.");
+end. 

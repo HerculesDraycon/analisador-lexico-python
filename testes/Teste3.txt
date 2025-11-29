@@ -1,0 +1,19 @@
+program TesteDeLimites;
+
+var _variavel_underscore, var2 : integer;
+var num_real_grande, num_real_pequeno : real;
+var string_vazia : string;
+const PI_APROX := 3.14e+00;
+
+/*
+Este eh um comentario
+com multiplas linhas
+e com * simbolos * dentro.
+*/
+
+begin
+  _variavel_underscore := 123;
+  num_real_grande := 9.87E-10;
+  num_real_pequeno := 1e-5;
+  string_vazia := "";
+end.
