@@ -1,0 +1,8 @@
+program erroLexico;
+var 
+    valor : integer;
+begin
+    valor := 100;
+    /* O arroba nao existe na linguagem Sigma */
+    valor := valor @ 10; 
+end.

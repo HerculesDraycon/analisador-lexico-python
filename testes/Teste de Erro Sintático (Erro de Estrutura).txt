@@ -1,0 +1,7 @@
+program erroSintatico;
+var 
+    x : integer;
+begin
+    x := 10  /* Faltou o ponto e virgula aqui */
+    write(x);
+end.

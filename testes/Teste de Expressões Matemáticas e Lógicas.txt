@@ -1,0 +1,17 @@
+program exemploMath;
+var 
+    x, y, z : integer;
+    resultado : boolean;
+begin
+    /* Teste de precedencia: 2 + (3 * 4) = 14 */
+    x := 2 + 3 * 4; 
+    
+    /* Teste de parenteses: (2 + 3) * 4 = 20 */
+    y := (2 + 3) * 4;
+    
+    /* Expressao booleana complexa */
+    if x <> y then
+        resultado := true;
+        
+    writeln(x, y);
+end.

@@ -1,0 +1,9 @@
+program exemploBasico;
+var 
+    numeroA, numeroB : integer;
+begin
+    numeroA := 10;
+    numeroB := 20;
+    writeln('A soma eh:');
+    writeln(numeroA + numeroB);
+end.
