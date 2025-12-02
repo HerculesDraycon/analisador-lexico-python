@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analisador Léxico - Interface Web</title>
+    <title>Analisador Sintático - Interface Web</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -13,10 +13,10 @@
         <header class="header">
             <div class="header-content">
                 <div class="logo">
-                    <i class="fas fa-code"></i>
-                    <h1>Analisador Léxico</h1>
+                    <i class="fas fa-project-diagram"></i>
+                    <h1>Analisador Sintático</h1>
                 </div>
-                <p class="subtitle">Análise de tokens em código Pascal</p>
+                <p class="subtitle">Validação de estrutura sintática com logs detalhados</p>
             </div>
         </header>
 
@@ -25,7 +25,7 @@
                 <div class="section-header">
                     <h2><i class="fas fa-code"></i> Código para Análise</h2>
                     <div class="input-controls">
-                        <button type="button" class="btn btn-secondary" onclick="loadExample()">
+                        <button type="button" class="btn btn-secondary" id="exampleBtnSintatico">
                             <i class="fas fa-file-code"></i> Exemplo
                         </button>
                         <a class="btn btn-secondary" href="{{ url_for('home') }}">
@@ -33,36 +33,35 @@
                         </a>
                     </div>
                 </div>
-                
-                <!-- Área de upload de arquivos -->
+
                 <div class="file-upload-section">
-                    <div class="upload-area" id="uploadArea">
+                    <div class="upload-area" id="uploadAreaSintatico">
                         <div class="upload-content">
                             <i class="fas fa-cloud-upload-alt upload-icon"></i>
                             <p class="upload-text">Arraste arquivos .txt ou .docx aqui</p>
                             <p class="upload-subtext">ou clique para selecionar</p>
-                            <input type="file" id="fileInput" accept=".txt,.docx" style="display: none;">
-                            <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                            <input type="file" id="fileInputSintatico" accept=".txt,.docx" style="display: none;">
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInputSintatico').click()">
                                 <i class="fas fa-file-upload"></i> Selecionar Arquivo
                             </button>
                         </div>
                     </div>
-                    <div class="file-info" id="fileInfo" style="display: none;">
+                    <div class="file-info" id="fileInfoSintatico" style="display: none;">
                         <div class="file-details">
                             <i class="fas fa-file-alt"></i>
-                            <span class="file-name" id="fileName"></span>
-                            <span class="file-size" id="fileSize"></span>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="removeFile()">
+                            <span class="file-name" id="fileNameSintatico"></span>
+                            <span class="file-size" id="fileSizeSintatico"></span>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="removeFileSintatico()">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="input-divider">
                     <span>OU</span>
                 </div>
-                
+
                 <textarea 
                     id="codeInput" 
                     placeholder="Digite ou cole seu código Pascal aqui..."
@@ -71,68 +70,27 @@
             </div>
 
             <div class="action-section">
-                <button id="analyzeBtn" class="btn btn-primary">
+                <button id="parseBtn" class="btn btn-primary">
                     <i class="fas fa-play"></i>
-                    <span>Analisar Código</span>
+                    <span>Validar Sintaxe</span>
                 </button>
             </div>
 
             <div class="results-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-list"></i> Tokens Identificados</h2>
+                    <h2><i class="fas fa-stream"></i> Logs da Análise</h2>
                     <div class="results-info">
-                        <span id="tokenCount">0 tokens</span>
-                        <button id="downloadBtn" class="btn btn-secondary" style="display: none;">
+                        <span id="statusSintatico">Aguardando análise</span>
+                        <button id="downloadBtnSintatico" class="btn btn-secondary" style="display: none;">
                             <i class="fas fa-download"></i> Download
                         </button>
                     </div>
                 </div>
-                
-                <div id="resultsContainer" class="results-container">
+                <div id="resultsContainerSintatico" class="results-container" style="padding: 20px;">
                     <div class="empty-state">
                         <i class="fas fa-search"></i>
                         <p>Nenhuma análise realizada ainda</p>
-                        <small>Digite um código e clique em "Analisar Código" para ver os tokens</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="legend-section">
-                <div class="section-header">
-                    <h3><i class="fas fa-info-circle"></i> Legenda de Tokens</h3>
-                </div>
-                <div class="legend-grid">
-                    <div class="legend-item">
-                        <span class="token-badge reserved">RESERVED_TOKEN</span>
-                        <span>Palavras reservadas</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="token-badge identifier">ID</span>
-                        <span>Identificadores</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="token-badge number">NUMBER</span>
-                        <span>Números</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="token-badge string">STRING</span>
-                        <span>Strings</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="token-badge operator">OP</span>
-                        <span>Operadores</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="token-badge delimiter">DELIMITER</span>
-                        <span>Delimitadores</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="token-badge conditional">CONDITIONAL</span>
-                        <span>Condicionais</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="token-badge loop">LOOP</span>
-                        <span>Estruturas de repetição</span>
+                        <small>Digite um código e clique em "Validar Sintaxe" para ver os logs</small>
                     </div>
                 </div>
             </div>
@@ -161,6 +119,6 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sintatico.js') }}"></script>
 </body>
 </html>

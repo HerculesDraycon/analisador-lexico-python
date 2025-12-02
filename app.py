@@ -1,5 +1,9 @@
 import re
 import sys
+from flask import Flask, render_template, request, jsonify
+from docx import Document
+import io
+import contextlib
 
 # ==============================================================================
 # 1. ANALISADOR LÉXICO (Mantido, mas gera tokens para o parser)
@@ -334,35 +338,123 @@ class Parser:
             self._exit_rule("fator")
 
 # ==============================================================================
+# 3. INTERFACE WEB
+# ==============================================================================
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/lexico')
+def lexico():
+    return render_template('index.html')
+
+@app.route('/sintatico')
+def sintatico():
+    return render_template('sintatico.html')
+
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    data = request.get_json(force=True)
+    code = data.get('code', '')
+    tokens = []
+    for t in lexer(code):
+        if t[0] == 'EOF':
+            continue
+        tokens.append([t[0], t[1]])
+    return jsonify({"tokens": tokens})
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    f = request.files.get('file')
+    if not f:
+        return jsonify({"success": False, "error": "Arquivo não enviado"}), 400
+    filename = f.filename
+    if filename.lower().endswith('.txt'):
+        content = f.stream.read().decode('utf-8', errors='ignore')
+    elif filename.lower().endswith('.docx'):
+        doc = Document(f)
+        content = "\n".join(p.text for p in doc.paragraphs)
+    else:
+        return jsonify({"success": False, "error": "Tipo de arquivo não suportado"}), 400
+    tokens = []
+    for t in lexer(content):
+        if t[0] == 'EOF':
+            continue
+        tokens.append([t[0], t[1]])
+    return jsonify({"success": True, "filename": filename, "content": content, "tokens": tokens})
+
+@app.route('/parse', methods=['POST'])
+def parse():
+    data = request.get_json(force=True)
+    code = data.get('code', '')
+    buf = io.StringIO()
+    valid = True
+    message = ""
+    try:
+        tokens = list(lexer(code))
+        with contextlib.redirect_stdout(buf):
+            p = Parser(tokens)
+            p.parse_program()
+        message = "Código válido"
+    except SyntaxError as e:
+        valid = False
+        message = str(e)
+        tokens = []
+    logs = buf.getvalue().splitlines()
+    return jsonify({"valid": valid, "message": message, "logs": logs})
+
+@app.route('/upload_parse', methods=['POST'])
+def upload_parse():
+    f = request.files.get('file')
+    if not f:
+        return jsonify({"success": False, "error": "Arquivo não enviado"}), 400
+    filename = f.filename
+    if filename.lower().endswith('.txt'):
+        content = f.stream.read().decode('utf-8', errors='ignore')
+    elif filename.lower().endswith('.docx'):
+        doc = Document(f)
+        content = "\n".join(p.text for p in doc.paragraphs)
+    else:
+        return jsonify({"success": False, "error": "Tipo de arquivo não suportado"}), 400
+    buf = io.StringIO()
+    valid = True
+    message = ""
+    try:
+        tokens = list(lexer(content))
+        with contextlib.redirect_stdout(buf):
+            p = Parser(tokens)
+            p.parse_program()
+        message = "Código válido"
+    except SyntaxError as e:
+        valid = False
+        message = str(e)
+    logs = buf.getvalue().splitlines()
+    return jsonify({"success": True, "filename": filename, "content": content, "valid": valid, "message": message, "logs": logs})
+
+# ==============================================================================
 # 3. EXECUÇÃO
 # ==============================================================================
 
 if __name__ == "__main__":
-    print("Digite o nome do arquivo que deseja ler: ")
-    nome_arquivo = input()
-
-    try:
-        with open(nome_arquivo, 'r', encoding='utf-8') as file:
-            codigo = file.read()
-        
-        print("\n" + "="*40)
-        print("INICIANDO ANÁLISE SINTÁTICA DETALHADA")
-        print("Legenda: ENTER = Prevendo Regra | SHIFT = Consumindo Token | REDUCE = Regra Reconhecida")
-        print("="*40 + "\n")
-        
-        tokens_gerados = list(lexer(codigo))
-        
-        parser = Parser(tokens_gerados)
-        parser.parse_program()
-        
-        print("\n" + "="*40)
-        print("RESULTADO: O CÓDIGO FONTE É VÁLIDO.")
-        print("="*40)
-        
-    except FileNotFoundError:
-        print(f"Erro: Arquivo '{nome_arquivo}' não encontrado.")
-    except SyntaxError as e:
-        print(f"\n[FALHA NA ANÁLISE] O código é INVÁLIDO.")
-        print(e)
-    except Exception as e:
-        print(f"\nErro inesperado: {e}")
+    if "--cli" in sys.argv:
+        print("Digite o nome do arquivo que deseja ler: ")
+        nome_arquivo = input()
+        try:
+            with open(nome_arquivo, 'r', encoding='utf-8') as file:
+                codigo = file.read()
+            tokens_gerados = list(lexer(codigo))
+            parser = Parser(tokens_gerados)
+            parser.parse_program()
+            print("RESULTADO: O CÓDIGO FONTE É VÁLIDO.")
+        except FileNotFoundError:
+            print(f"Erro: Arquivo '{nome_arquivo}' não encontrado.")
+        except SyntaxError as e:
+            print(f"\n[FALHA NA ANÁLISE] O código é INVÁLIDO.")
+            print(e)
+        except Exception as e:
+            print(f"\nErro inesperado: {e}")
+    else:
+        app.run(host='0.0.0.0', port=5000, debug=True)
