@@ -1,0 +1,18 @@
+program exemploFluxo;
+var 
+    contador : integer;
+    ativo : boolean;
+begin
+    contador := 0;
+    ativo := true;
+    
+    while contador < 5 do
+    begin
+        if contador < 3 then
+            write('Menor que 3')
+        else
+            write('Maior ou igual a 3');
+            
+        contador := contador + 1;
+    end;
+end.

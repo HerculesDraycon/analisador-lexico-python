@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escolha do Analisador</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-code"></i>
+                    <h1>Selecionar Analisador</h1>
+                </div>
+                <p class="subtitle">Escolha entre Analisador Léxico ou Sintático</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="input-section" style="text-align:center;">
+                <h2 style="margin-bottom:20px;"><i class="fas fa-tools"></i> Qual analisador deseja usar?</h2>
+                <div class="controls" style="justify-content:center;">
+                    <a class="btn btn-primary" href="{{ url_for('lexico') }}">
+                        <i class="fas fa-list"></i> Analisador Léxico
+                    </a>
+                    <a class="btn btn-secondary" href="{{ url_for('sintatico') }}">
+                        <i class="fas fa-project-diagram"></i> Analisador Sintático
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+

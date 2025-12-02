@@ -19,18 +19,39 @@ token_specification = [
     ("STRING",        r'"[^"]*"'),                      # Strings delimitadas por aspas duplas
     ("CHAR",          r"'[^']*'"),                      # Caracteres delimitados por aspas simples
     ("NUMBER",        r'\d+(\.\d*)?([eE][+-]?\d+)?'),   # Numeros inteiros, decimais e com notacao cientifica
-    ("BLOCK",         r'\b(begin|end)\b'),              # Blocos de comandos
-    ("CONDITIONAL",   r'\b(if|then|else)\b'),           # Condicionais
-    ("LOOP",          r'\b(while|do)\b'),               # Estruturas de repetição
+    ("BEGIN",         r'\bbegin\b'),                    # Blocos de comandos
+    ("END",           r'\bend\b'),                      # Blocos de comandos
+    ("IF",            r'\bif\b'),                       # Condicionais
+    ("THEN",          r'\bthen\b'),                     # Condicionais
+    ("ELSE",          r'\belse\b'),                     # Condicionais
+    ("WHILE",         r'\bwhile\b'),                    # Estruturas de repetição
+    ("DO",            r'\bdo\b'),                       # Estruturas de repetição
     ("REPEAT",        r'\brepeat\b'),                   # palavra reservada "repeat"
     ("UNTIL",         r'\buntil\b'),                    # palavra reservada "until"
-    ("FOR_TO_DO",     r'\b(for|to|do)\b'),              # Estrutura de for-to-do
-    ("OP_LOGICO",     r'\b(and|or|not)\b'),             # Operadores logicos
-    ("OP",            r'\b(mod|div)\b|[+\-*/]'),        # Operadores
-    ("OP_RELACIONAL", r'<=|>=|<>|<|>|='),               # Operadores relacionais
+    ("FOR",           r'\bfor\b'),                      # Estrutura de for-to-do
+    ("TO",            r'\bto\b'),                       # Estrutura de for-to-do
+    ("AND",           r'\band\b'),                      # Operadores logicos
+    ("OR",            r'\bor\b'),                       # Operadores logicos
+    ("NOT",           r'\bnot\b'),                      # Operadores logicos
+    ("MOD",           r'\bmod\b'),                      # Operadores
+    ("DIV",           r'\bdiv\b'),                      # Operadores
+    ("PLUS",          r'\+'),                       # Operadores
+    ("MINUS",         r'-'),                     # Operadores
+    ("DIVIDE",        r'/'),                              # Operadores
+    ("TIMES",         r'\*'),                  # Operadores
+    ("LESS_EQUAL",    r'<='),                        # Operadores relacionais
+    ("GREATER_EQUAL", r'>='),                           # Operadores relacionais
+    ("NOT_EQUAL",     r'<>'),                          # Operadores relacionais
+    ("LESS_THAN",     r'<'),                         # Operadores relacionais
+    ("GREATER_THAN",  r'>'),                           # Operadores relacionais
+    ("EQUAL",         r'='),                              # Operadores relacionais
     ("ASSIGN",        r':='),                           # Atribuicao
-    ("ID",            r'[A-Za-z_]\w*'),                 # Identificadores
-    ("DELIMITER",     r'[();,:]'),                      # Simbolos especiais
+    ("ID",            r'[A-Za-z_]\w*'),                 # Identificadores("LPAREN",  r"\("),
+    ("LPAREN",        r'\('),
+    ("RPAREN",        r'\)'),
+    ("SEMI",          r';'),
+    ("COLON",         r':'),
+    ("COMMA",         r','),
     ("END_PROGRAM",   r'\.'),                           # Final de programa
     ("SKIP",          r'[ \t]+'),                       # Espacos e tabulacoes
     ("MISMATCH",      r'.'),                            # Qualquer coisa inesperada

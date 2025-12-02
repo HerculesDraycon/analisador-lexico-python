@@ -1,286 +1,460 @@
-from flask import Flask, render_template, request, jsonify
-import os
 import re
-import traceback
+import sys
+from flask import Flask, render_template, request, jsonify
 from docx import Document
-from werkzeug.utils import secure_filename
+import io
+import contextlib
 
-app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-app.config['UPLOAD_FOLDER'] = 'uploads'
+# ==============================================================================
+# 1. ANALISADOR LÉXICO (Mantido, mas gera tokens para o parser)
+# ==============================================================================
 
-# Criar pasta de uploads se não existir
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
-
-# Extensões de arquivo permitidas
-ALLOWED_EXTENSIONS = {'txt', 'docx'}
-
-def allowed_file(filename):
-    """Verifica se o arquivo tem extensão permitida"""
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def extract_text_from_file(file_path, filename):
-    """Extrai texto de arquivos .txt ou .docx"""
-    try:
-        file_extension = filename.rsplit('.', 1)[1].lower()
-        
-        if file_extension == 'txt':
-            # Ler arquivo .txt
-            with open(file_path, 'r', encoding='utf-8') as file:
-                return file.read()
-        
-        elif file_extension == 'docx':
-            # Ler arquivo .docx
-            doc = Document(file_path)
-            text = []
-            for paragraph in doc.paragraphs:
-                text.append(paragraph.text)
-            return '\n'.join(text)
-        
-        else:
-            return None
-            
-    except Exception as e:
-        print(f"Erro ao extrair texto do arquivo: {e}")
-        return None
 palavras_reservadas = {
-    "ABSOLUTE", "AND", "ARRAY", "BEGIN", "CASE", "CHAR", "CONST", "DIV", "DO",
-    "DOWNTO", "ELSE", "END", "EXTERNAL", "FILE", "FOR", "FORWARD", "FUNC",
-    "FUNCTION", "GOTO", "IF", "IMPLEMENTATION", "INTEGER", "INTERFACE",
-    "INTERRUPT", "LABEL", "MAIN", "NIL", "NIT", "NOT", "OF", "OR", "PACKED",
-    "PROC", "PROGRAM", "REAL", "RECORD", "REPEAT", "SET", "SHL", "SHR",
-    "STRING", "THEN", "TO", "TYPE", "UNIT", "UNTIL", "USES", "VAR",
-    "WHILE", "WITH", "XOR"
+    "PROGRAM", "VAR", "INTEGER", "BOOLEAN", "BEGIN", "END", "IF", "THEN",
+    "ELSE", "WHILE", "DO", "READ", "READLN", "WRITE", "WRITELN", "TRUE", "FALSE"
 }
 
-# Definição dos padrões de tokens (copiado do analisador original)
 token_specification = [
-    ("COMMENT",       r'/\*.*?\*/'),                    # Comentarios
-    ("READ",          r'\bread\b'),                     # Comando de entrada
-    ("WRITE",         r'\bwrite\b'),                    # Comando de saída
-    ("WRITELN",       r'\bwriteln\b'),                  # Comando de saída com quebra de linha
-    ("STRING",        r'"[^"]*"'),                      # Strings delimitadas por aspas duplas
-    ("CHAR",          r"'[^']*'"),                      # Caracteres delimitados por aspas simples
-    ("NUMBER",        r'\d+(\.\d*)?([eE][+-]?\d+)?'),   # Numeros inteiros, decimais e com notacao cientifica
-    ("BLOCK",         r'\b(begin|end)\b'),              # Blocos de comandos
-    ("CONDITIONAL",   r'\b(if|then|else)\b'),           # Condicionais
-    ("LOOP",          r'\b(while|do)\b'),               # Estruturas de repetição
-    ("REPEAT",        r'\brepeat\b'),                   # palavra reservada "repeat"
-    ("UNTIL",         r'\buntil\b'),                    # palavra reservada "until"
-    ("FOR_TO_DO",     r'\b(for|to|do)\b'),              # Estrutura de for-to-do
-    ("OP_LOGICO",     r'\b(and|or|not)\b'),             # Operadores logicos
-    ("OP",            r'\b(mod|div)\b|[+\-*/]'),        # Operadores
-    ("OP_RELACIONAL", r'<=|>=|<>|<|>|='),               # Operadores relacionais
-    ("ASSIGN",        r':='),                           # Atribuicao
-    ("ID",            r'[A-Za-z_]\w*'),                 # Identificadores
-    ("DELIMITER",     r'[();,:]'),                      # Simbolos especiais
-    ("END_PROGRAM",   r'\.'),                           # Final de programa
-    ("SKIP",          r'[ \t]+'),                       # Espacos e tabulacoes
-    ("MISMATCH",      r'.'),                            # Qualquer coisa inesperada
+    ("COMMENT",       r'/\*.*?\*/'),                    
+    ("STRING",        r"'[^']*'"),                      
+    ("NUMBER",        r'\d+(\.\d*)?'),                  
+    ("ASSIGN",        r':='),                           
+    ("LE_EQ",         r'<='),                           
+    ("GE_EQ",         r'>='),                           
+    ("NE_EQ",         r'<>'),                           
+    ("SEMI",          r';'),
+    ("COLON",         r':'),
+    ("COMMA",         r','),
+    ("DOT",           r'\.'),                           
+    ("LPAREN",        r'\('),
+    ("RPAREN",        r'\)'),
+    ("PLUS",          r'\+'),
+    ("MINUS",         r'-'),
+    ("TIMES",         r'\*'),
+    ("DIVIDE",        r'/'),
+    ("EQUAL",         r'='),
+    ("LESS",          r'<'),
+    ("GREATER",       r'>'),
+    ("ID",            r'[A-Za-z_]\w*'),                 
+    ("SKIP",          r'[ \t\n]+'),                     
+    ("MISMATCH",      r'.'),                            
 ]
 
-# Compilar regex (copiado do analisador original)
 tok_regex = "|".join(f"(?P<{name}>{pattern})" for name, pattern in token_specification)
 get_token = re.compile(tok_regex, re.DOTALL).match
 
 def lexer(code):
-    """
-    Função lexer original adaptada para retornar lista de tokens
-    """
-    tokens = []
+    line_num = 1
     pos = 0
-    
     while pos < len(code):
         match = get_token(code, pos)
         if not match:
-            raise SyntaxError(f"Caractere inválido na posição {pos}: '{code[pos]}'")
+            raise SyntaxError(f"Caractere inválido na posição {pos}")
         
         kind = match.lastgroup
         value = match.group()
         
-        # Verificação se o ID é igual a algum token presente na lista "palavras_reservadas"
-        if kind == "ID" and value.upper() in palavras_reservadas:
-            kind = "RESERVED_TOKEN"
-        
-        # Filtrar tokens desnecessários
-        if kind not in ("SKIP", "MISMATCH", "COMMENT"):
-            tokens.append((kind, value))
-        
+        if kind == "SKIP":
+            line_num += value.count('\n')
+        elif kind == "ID":
+            if value.upper() in palavras_reservadas:
+                kind = value.upper() 
+            yield kind, value, line_num
+        elif kind == "MISMATCH":
+            raise SyntaxError(f"Erro léxico: '{value}' na linha {line_num}")
+        elif kind != "COMMENT":
+            yield kind, value, line_num
+            
         pos = match.end()
     
-    return tokens
+    yield "EOF", "", line_num
+
+# ==============================================================================
+# 2. ANALISADOR SINTÁTICO COM LOGS (Instrumentado)
+# ==============================================================================
+
+class Parser:
+    def __init__(self, tokens):
+        self.tokens = list(tokens)
+        self.pos = 0
+        self.current_token = self.tokens[self.pos]
+        self.indent_level = 0 # Controla a indentação dos logs
+
+    # --- Helpers de Log ---
+    def _log(self, msg):
+        indent = "|   " * self.indent_level
+        print(f"{indent}{msg}")
+
+    def _enter_rule(self, rule_name):
+        self._log(f"┌── ENTER <{rule_name}>")
+        self.indent_level += 1
+
+    def _exit_rule(self, rule_name):
+        self.indent_level -= 1
+        self._log(f"└── REDUCE <{rule_name}> (Regra validada)")
+
+    def _shift_log(self, token_type, value):
+        indent = "|   " * self.indent_level
+        print(f"{indent}>> SHIFT: Consumiu '{value}' ({token_type})")
+
+    # --- Controle de Fluxo ---
+    def error(self, msg):
+        token_atual = self.current_token
+        raise SyntaxError(
+            f"\n[ERRO SINTÁTICO] {msg}\n"
+            f"Linha: {token_atual[2]} | Encontrado: '{token_atual[1]}' ({token_atual[0]})"
+        )
+
+    def eat(self, token_type):
+        if self.current_token[0] == token_type:
+            self._shift_log(token_type, self.current_token[1])
+            self.pos += 1
+            if self.pos < len(self.tokens):
+                self.current_token = self.tokens[self.pos]
+        else:
+            self.error(f"Esperava token '{token_type}'")
+
+    # --- Regras da Gramática (Métodos) ---
+
+    def parse_program(self):
+        self._enter_rule("programa")
+        try:
+            self.eat('PROGRAM')
+            self.eat('ID')
+            self.eat('SEMI')
+            
+            if self.current_token[0] == 'VAR':
+                self.parse_declaracoes()
+                
+            self.eat('BEGIN')
+            self.parse_lista_comandos()
+            self.eat('END')
+            self.eat('DOT')
+        finally:
+            self._exit_rule("programa")
+
+    def parse_declaracoes(self):
+        self._enter_rule("declarações")
+        try:
+            self.eat('VAR')
+            while self.current_token[0] == 'ID':
+                self.parse_lista_ids()
+                self.eat('COLON')
+                self.parse_tipo()
+                self.eat('SEMI')
+        finally:
+            self._exit_rule("declarações")
+
+    def parse_lista_ids(self):
+        self._enter_rule("lista_ids")
+        try:
+            self.eat('ID')
+            while self.current_token[0] == 'COMMA':
+                self.eat('COMMA')
+                self.eat('ID')
+        finally:
+            self._exit_rule("lista_ids")
+
+    def parse_tipo(self):
+        self._enter_rule("tipo")
+        try:
+            if self.current_token[0] in ('INTEGER', 'BOOLEAN'):
+                self.eat(self.current_token[0])
+            else:
+                self.error("Esperado tipo 'integer' ou 'boolean'")
+        finally:
+            self._exit_rule("tipo")
+
+    def parse_lista_comandos(self):
+        self._enter_rule("lista_comandos")
+        try:
+            self.parse_comando()
+            self.eat('SEMI')
+            
+            first_comando = {'ID', 'READ', 'READLN', 'WRITE', 'WRITELN', 'BEGIN', 'IF', 'WHILE'}
+            while self.current_token[0] in first_comando:
+                self.parse_comando()
+                self.eat('SEMI')
+        finally:
+            self._exit_rule("lista_comandos")
+
+    def parse_comando(self):
+        self._enter_rule("comando")
+        try:
+            token_type = self.current_token[0]
+            if token_type == 'ID':
+                self.parse_atribuicao()
+            elif token_type in ('READ', 'READLN'):
+                self.parse_leitura()
+            elif token_type in ('WRITE', 'WRITELN'):
+                self.parse_escrita()
+            elif token_type == 'BEGIN':
+                self.parse_composto()
+            elif token_type == 'IF':
+                self.parse_condicional()
+            elif token_type == 'WHILE':
+                self.parse_repeticao()
+            else:
+                self.error("Comando não reconhecido")
+        finally:
+            self._exit_rule("comando")
+
+    def parse_atribuicao(self):
+        self._enter_rule("atribuição")
+        try:
+            self.eat('ID')
+            self.eat('ASSIGN')
+            self.parse_expr()
+        finally:
+            self._exit_rule("atribuição")
+
+    def parse_leitura(self):
+        self._enter_rule("leitura")
+        try:
+            if self.current_token[0] == 'READ':
+                self.eat('READ')
+                self.eat('LPAREN')
+                self.parse_lista_ids()
+                self.eat('RPAREN')
+            elif self.current_token[0] == 'READLN':
+                self.eat('READLN')
+                if self.current_token[0] == 'LPAREN':
+                    self.eat('LPAREN')
+                    self.parse_lista_ids()
+                    self.eat('RPAREN')
+        finally:
+            self._exit_rule("leitura")
+
+    def parse_escrita(self):
+        self._enter_rule("escrita")
+        cmd = self.current_token[0]
+        try:
+            self.eat(cmd)
+            if self.current_token[0] == 'LPAREN':
+                self.eat('LPAREN')
+                self.parse_lista_stringvar()
+                self.eat('RPAREN')
+        finally:
+            self._exit_rule("escrita")
+
+    def parse_lista_stringvar(self):
+        self._enter_rule("lista_stringvar")
+        try:
+            self.parse_stringvar()
+            while self.current_token[0] == 'COMMA':
+                self.eat('COMMA')
+                self.parse_stringvar()
+        finally:
+            self._exit_rule("lista_stringvar")
+
+    def parse_stringvar(self):
+        # Não logaremos enter/exit aqui para não poluir muito, pois é muito simples
+        if self.current_token[0] == 'STRING':
+            self.eat('STRING')
+        else:
+            self.parse_expr()
+
+    def parse_composto(self):
+        self._enter_rule("composto")
+        try:
+            self.eat('BEGIN')
+            self.parse_lista_comandos()
+            self.eat('END')
+        finally:
+            self._exit_rule("composto")
+
+    def parse_condicional(self):
+        self._enter_rule("condicional")
+        try:
+            self.eat('IF')
+            self.parse_exprboolean()
+            self.eat('THEN')
+            self.parse_comando()
+            if self.current_token[0] == 'ELSE':
+                self.eat('ELSE')
+                self.parse_comando()
+        finally:
+            self._exit_rule("condicional")
+
+    def parse_repeticao(self):
+        self._enter_rule("repetição")
+        try:
+            self.eat('WHILE')
+            self.parse_exprboolean()
+            self.eat('DO')
+            self.parse_comando()
+        finally:
+            self._exit_rule("repetição")
+
+    def parse_exprboolean(self):
+        self._enter_rule("expr_boolean")
+        try:
+            self.parse_expr()
+            ops_relacionais = {'LESS', 'LE_EQ', 'GREATER', 'GE_EQ', 'EQUAL', 'NE_EQ'}
+            if self.current_token[0] in ops_relacionais:
+                self.eat(self.current_token[0])
+                self.parse_expr()
+        finally:
+            self._exit_rule("expr_boolean")
+
+    def parse_expr(self):
+        self._enter_rule("expressão")
+        try:
+            self.parse_termo()
+            while self.current_token[0] in ('PLUS', 'MINUS'):
+                self.eat(self.current_token[0])
+                self.parse_termo()
+        finally:
+            self._exit_rule("expressão")
+
+    def parse_termo(self):
+        self._enter_rule("termo")
+        try:
+            self.parse_fator()
+            while self.current_token[0] in ('TIMES', 'DIVIDE'):
+                self.eat(self.current_token[0])
+                self.parse_fator()
+        finally:
+            self._exit_rule("termo")
+
+    def parse_fator(self):
+        self._enter_rule("fator")
+        try:
+            token = self.current_token
+            if token[0] in ('PLUS', 'MINUS'):
+                self.eat(token[0])
+                self.parse_fator()
+            elif token[0] == 'LPAREN':
+                self.eat('LPAREN')
+                self.parse_expr()
+                self.eat('RPAREN')
+            elif token[0] == 'ID':
+                self.eat('ID')
+            elif token[0] == 'NUMBER':
+                self.eat('NUMBER')
+            else:
+                self.error("Fator inesperado")
+        finally:
+            self._exit_rule("fator")
+
+# ==============================================================================
+# 3. INTERFACE WEB
+# ==============================================================================
+
+app = Flask(__name__)
 
 @app.route('/')
-def index():
-    """Rota principal que serve a interface web"""
+def home():
+    return render_template('home.html')
+
+@app.route('/lexico')
+def lexico():
     return render_template('index.html')
 
+@app.route('/sintatico')
+def sintatico():
+    return render_template('sintatico.html')
+
 @app.route('/analyze', methods=['POST'])
-def analyze_code():
-    """
-    Endpoint para análise do código
-    Recebe código via POST e retorna tokens em JSON
-    """
-    try:
-        # Obter dados da requisição
-        data = request.get_json()
-        
-        if not data or 'code' not in data:
-            return jsonify({
-                'error': 'Código não fornecido',
-                'details': 'O campo "code" é obrigatório'
-            }), 400
-        
-        code = data['code'].strip()
-        
-        if not code:
-            return jsonify({
-                'error': 'Código vazio',
-                'details': 'Por favor, forneça algum código para análise'
-            }), 400
-        
-        # Executar análise léxica
-        tokens = lexer(code)
-        
-        # Estatísticas
-        token_types = {}
-        for token_type, _ in tokens:
-            token_types[token_type] = token_types.get(token_type, 0) + 1
-        
-        # Resposta de sucesso
-        return jsonify({
-            'success': True,
-            'tokens': tokens,
-            'total_tokens': len(tokens),
-            'token_types': token_types,
-            'code_length': len(code),
-            'code_lines': len(code.split('\n'))
-        })
-        
-    except SyntaxError as e:
-        # Erro de sintaxe no código
-        return jsonify({
-            'error': 'Erro de sintaxe',
-            'details': str(e)
-        }), 400
-        
-    except Exception as e:
-        # Erro interno do servidor
-        app.logger.error(f"Erro na análise: {str(e)}")
-        app.logger.error(traceback.format_exc())
-        
-        return jsonify({
-            'error': 'Erro interno do servidor',
-            'details': 'Ocorreu um erro inesperado durante a análise'
-        }), 500
+def analyze():
+    data = request.get_json(force=True)
+    code = data.get('code', '')
+    tokens = []
+    for t in lexer(code):
+        if t[0] == 'EOF':
+            continue
+        tokens.append([t[0], t[1]])
+    return jsonify({"tokens": tokens})
 
 @app.route('/upload', methods=['POST'])
-def upload_file():
-    """Rota para upload e análise de arquivos"""
+def upload():
+    f = request.files.get('file')
+    if not f:
+        return jsonify({"success": False, "error": "Arquivo não enviado"}), 400
+    filename = f.filename
+    if filename.lower().endswith('.txt'):
+        content = f.stream.read().decode('utf-8', errors='ignore')
+    elif filename.lower().endswith('.docx'):
+        doc = Document(f)
+        content = "\n".join(p.text for p in doc.paragraphs)
+    else:
+        return jsonify({"success": False, "error": "Tipo de arquivo não suportado"}), 400
+    tokens = []
+    for t in lexer(content):
+        if t[0] == 'EOF':
+            continue
+        tokens.append([t[0], t[1]])
+    return jsonify({"success": True, "filename": filename, "content": content, "tokens": tokens})
+
+@app.route('/parse', methods=['POST'])
+def parse():
+    data = request.get_json(force=True)
+    code = data.get('code', '')
+    buf = io.StringIO()
+    valid = True
+    message = ""
     try:
-        if 'file' not in request.files:
-            return jsonify({'error': 'Nenhum arquivo enviado'}), 400
-        
-        file = request.files['file']
-        
-        if file.filename == '':
-            return jsonify({'error': 'Nenhum arquivo selecionado'}), 400
-        
-        if file and allowed_file(file.filename):
-            # Salvar arquivo com nome seguro
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            
-            # Extrair texto do arquivo
-            text_content = extract_text_from_file(file_path, filename)
-            
-            # Remover arquivo após extração
-            os.remove(file_path)
-            
-            if text_content is None:
-                return jsonify({'error': 'Erro ao extrair texto do arquivo'}), 500
-            
-            # Analisar o texto extraído
-            tokens = lexer(text_content)
-            
-            # Estatísticas
-            token_types = {}
-            for token_type, _ in tokens:
-                token_types[token_type] = token_types.get(token_type, 0) + 1
-            
-            return jsonify({
-                'success': True,
-                'filename': filename,
-                'content': text_content,
-                'tokens': tokens,
-                'total_tokens': len(tokens),
-                'token_types': token_types
-            })
-        
-        else:
-            return jsonify({'error': 'Tipo de arquivo não permitido. Use apenas .txt ou .docx'}), 400
-    
-    except Exception as e:
-        print(f"Erro no upload: {e}")
-        return jsonify({'error': f'Erro interno do servidor: {str(e)}'}), 500
+        tokens = list(lexer(code))
+        with contextlib.redirect_stdout(buf):
+            p = Parser(tokens)
+            p.parse_program()
+        message = "Código válido"
+    except SyntaxError as e:
+        valid = False
+        message = str(e)
+        tokens = []
+    logs = buf.getvalue().splitlines()
+    return jsonify({"valid": valid, "message": message, "logs": logs})
 
-@app.route('/health')
-def health_check():
-    """Endpoint para verificação de saúde da aplicação"""
-    return jsonify({
-        'status': 'healthy',
-        'service': 'Analisador Léxico Web',
-        'version': '1.0.0'
-    })
+@app.route('/upload_parse', methods=['POST'])
+def upload_parse():
+    f = request.files.get('file')
+    if not f:
+        return jsonify({"success": False, "error": "Arquivo não enviado"}), 400
+    filename = f.filename
+    if filename.lower().endswith('.txt'):
+        content = f.stream.read().decode('utf-8', errors='ignore')
+    elif filename.lower().endswith('.docx'):
+        doc = Document(f)
+        content = "\n".join(p.text for p in doc.paragraphs)
+    else:
+        return jsonify({"success": False, "error": "Tipo de arquivo não suportado"}), 400
+    buf = io.StringIO()
+    valid = True
+    message = ""
+    try:
+        tokens = list(lexer(content))
+        with contextlib.redirect_stdout(buf):
+            p = Parser(tokens)
+            p.parse_program()
+        message = "Código válido"
+    except SyntaxError as e:
+        valid = False
+        message = str(e)
+    logs = buf.getvalue().splitlines()
+    return jsonify({"success": True, "filename": filename, "content": content, "valid": valid, "message": message, "logs": logs})
 
-@app.errorhandler(404)
-def not_found(error):
-    """Handler para páginas não encontradas"""
-    return jsonify({
-        'error': 'Página não encontrada',
-        'details': 'O recurso solicitado não existe'
-    }), 404
+# ==============================================================================
+# 3. EXECUÇÃO
+# ==============================================================================
 
-@app.errorhandler(500)
-def internal_error(error):
-    """Handler para erros internos do servidor"""
-    return jsonify({
-        'error': 'Erro interno do servidor',
-        'details': 'Ocorreu um erro inesperado'
-    }), 500
-
-# Configurações de desenvolvimento
-if __name__ == '__main__':
-    # Verificar se as pastas necessárias existem
-    os.makedirs('templates', exist_ok=True)
-    os.makedirs('static/css', exist_ok=True)
-    os.makedirs('static/js', exist_ok=True)
-    
-    # Configurações de debug
-    app.config['DEBUG'] = True
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
-    
-    print("=" * 60)
-    print("🚀 ANALISADOR LÉXICO - INTERFACE WEB")
-    print("=" * 60)
-    print("📁 Estrutura de arquivos:")
-    print("   ├── app.py (servidor Flask)")
-    print("   ├── templates/")
-    print("   │   └── index.html")
-    print("   └── static/")
-    print("       ├── css/style.css")
-    print("       └── js/script.js")
-    print()
-    print("🌐 Servidor iniciando em: http://localhost:5000")
-    print("📝 Baseado no analisador léxico Python original")
-    print("=" * 60)
-    
-    # Iniciar servidor
-    app.run(
-        host='0.0.0.0',
-        port=5000,
-        debug=True,
-        use_reloader=True
-    )
+if __name__ == "__main__":
+    if "--cli" in sys.argv:
+        print("Digite o nome do arquivo que deseja ler: ")
+        nome_arquivo = input()
+        try:
+            with open(nome_arquivo, 'r', encoding='utf-8') as file:
+                codigo = file.read()
+            tokens_gerados = list(lexer(codigo))
+            parser = Parser(tokens_gerados)
+            parser.parse_program()
+            print("RESULTADO: O CÓDIGO FONTE É VÁLIDO.")
+        except FileNotFoundError:
+            print(f"Erro: Arquivo '{nome_arquivo}' não encontrado.")
+        except SyntaxError as e:
+            print(f"\n[FALHA NA ANÁLISE] O código é INVÁLIDO.")
+            print(e)
+        except Exception as e:
+            print(f"\nErro inesperado: {e}")
+    else:
+        app.run(host='0.0.0.0', port=5000, debug=True)
