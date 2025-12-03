@@ -332,6 +332,8 @@ class Parser:
                 self.eat('ID')
             elif token[0] == 'NUMBER':
                 self.eat('NUMBER')
+            elif token[0] in ('TRUE', 'FALSE'):
+                self.eat(token[0])
             else:
                 self.error("Fator inesperado")
         finally:
@@ -393,6 +395,7 @@ def parse():
     buf = io.StringIO()
     valid = True
     message = ""
+    
     try:
         tokens = list(lexer(code))
         with contextlib.redirect_stdout(buf):
@@ -402,8 +405,13 @@ def parse():
     except SyntaxError as e:
         valid = False
         message = str(e)
-        tokens = []
     logs = buf.getvalue().splitlines()
+    
+    if not valid:
+        logs.append("-" * 40)
+        logs.append("FALHA ENCONTRADA:")
+        logs.extend(message.split('\n'))
+        logs.append("-" * 40)
     return jsonify({"valid": valid, "message": message, "logs": logs})
 
 @app.route('/upload_parse', methods=['POST'])
@@ -422,6 +430,7 @@ def upload_parse():
     buf = io.StringIO()
     valid = True
     message = ""
+    
     try:
         tokens = list(lexer(content))
         with contextlib.redirect_stdout(buf):
@@ -431,7 +440,14 @@ def upload_parse():
     except SyntaxError as e:
         valid = False
         message = str(e)
+        
     logs = buf.getvalue().splitlines()
+    if not valid:
+        logs.append("-" * 40)
+        logs.append("FALHA ENCONTRADA:")
+        logs.extend(message.split('\n'))
+        logs.append("-" * 40)
+
     return jsonify({"success": True, "filename": filename, "content": content, "valid": valid, "message": message, "logs": logs})
 
 # ==============================================================================
