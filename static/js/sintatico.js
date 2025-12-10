@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const codeInput = document.getElementById('codeInput');
     const parseBtn = document.getElementById('parseBtn');
     const resultsContainer = document.getElementById('resultsContainerSintatico');
@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const exampleBtn = document.getElementById('exampleBtnSintatico');
     if (exampleBtn) {
         exampleBtn.addEventListener('click', () => {
-            const example = `program exemplo;\nvar x: integer;\nbegin\n    x := (2 + 3) * 4;\n    if x >= 10 then\n        write(x);\n    else\n        writeln('menor que 10');\nend.`;
+            const example = `program exemplo;\nvar x: integer;\nbegin\n    x := (2 + 3) * 4;\n    if x >= 10 then\n        write(x)\n    else\n        writeln('menor que 10');\nend.`;
             if (codeInput) codeInput.value = example;
         });
     }
